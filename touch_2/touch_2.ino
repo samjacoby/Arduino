@@ -4,8 +4,10 @@
 //       (touch input) pb4 -+   +- pb1 (fading while touching)
 //                  ground -+---+- pb0 (fading always)
 
-byte touchPins[] = {PB2, PB3, PB4, PB1, PB5};
-byte ledPins[] = { PB0};
+byte touchPins[] = {
+  PB2, PB3, PB4, PB1, PB5};
+byte ledPins[] = { 
+  PB0};
 
 int calibration = 0;
 int previous;
@@ -14,19 +16,25 @@ int togglestate = LOW;
 
 void setup()
 {
-  byte i, j;
-  
+
   CLKPR = (1 << CLKPCE);
   CLKPR = 0;
-  
+
+
+  calibrate();
+
+}
+
+void calibate() {
+  byte i, j;
   for(i = 0; i < sizeof(touchPins); i++) {
     pinMode(touchPins[i], INPUT);  
   }
-  
+
   for(byte i = 0; i < sizeof(ledPins); i++) {
     pinMode(ledPins[i], OUTPUT);  
   }
-  
+
   delay(100);
   for(j = 0; j < sizeof(touchPins); j++) {
     for (int i = 0; i < 8; i++) {
@@ -39,8 +47,6 @@ void setup()
   delay(500);
   digitalWrite(ledPins[0], LOW);
   delay(500);
-
-  // calibration complete
 }
 
 void loop()
@@ -48,18 +54,20 @@ void loop()
   byte i, n;
   for(i = 0; i < sizeof(touchPins); i++) {
     n = chargeTimeR(touchPins[i]);
-  
-  if (n > calibration) {
-    digitalWrite(ledPins[0], HIGH);
-    do {
-      delayMicroseconds(500);
-      n = chargeTimeR(touchPins[i]);
-    } while (n > calibration);     
-    digitalWrite(ledPins[0], LOW);
-  } else {
-    digitalWrite(ledPins[0], LOW);
-  }
-  delayMicroseconds(500);
+
+    if (n > calibration) {
+      digitalWrite(ledPins[0], HIGH);
+      do {
+        delayMicroseconds(500);
+        n = chargeTimeR(touchPins[i]);
+      } 
+      while (n > calibration);     
+      digitalWrite(ledPins[0], LOW);
+    } 
+    else {
+      digitalWrite(ledPins[0], LOW);
+    }
+    delayMicroseconds(500);
   }
 }
 
@@ -77,7 +85,7 @@ byte chargeTime(byte pin)
 {
   byte mask = (1 << pin);
   byte i;
-  
+
   DDRB &= ~mask; // input
   PORTB |= mask; // pull-up on
 
@@ -90,4 +98,5 @@ byte chargeTime(byte pin)
 
   return i;
 }
+
 
