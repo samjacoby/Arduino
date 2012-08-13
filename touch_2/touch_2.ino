@@ -8,10 +8,7 @@ byte touchPins[] = { PB2, PB3, PB4, PB1 };//, PB5};
 byte ledPins[] = { 
   PB0};
 
-int calibration = 0;
-int previous;
-
-int togglestate = LOW;
+int calibration[sizeof(touchPins)];
 
 void setup()
 {
@@ -46,15 +43,12 @@ void calibrate() {
     
     for (i = 0; i < 8; i++) {
       
-      calibration += chargeTimeR(touchPins[j]);
+      calibration[j] += chargeTimeR(touchPins[j]);
       delay(200);
     }
-    if(calibration > max) {
-      max = calibration;
-    }
-  }
   
-  calibration = (max + 4 * sizeof(touchPins)) / (8 * sizeof(touchPins));
+  calibration[j] = (calibration[j] + 4 * sizeof(touchPins)) / (8 * sizeof(touchPins));
+  }
   
   
   digitalWrite(ledPins[0], HIGH);
@@ -69,12 +63,12 @@ void loop()
   for(i = 0; i < sizeof(touchPins); i++) {
     n = chargeTimeR(touchPins[i]);
 
-    if (n > calibration) {
+    if (n > calibration[i]) {
       digitalWrite(ledPins[0], HIGH);
       do {
         delayMicroseconds(500);
         n = chargeTimeR(touchPins[i]);
-      } while (n > calibration);     
+      } while (n > calibration[i]);     
       digitalWrite(ledPins[0], LOW);
     } else {
       digitalWrite(ledPins[0], LOW);
