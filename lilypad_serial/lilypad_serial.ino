@@ -1,5 +1,5 @@
 
-int sensorPin = A0;
+int sensorPin = A6;
 
 void setup() {
     // initialize serial communications at 9600 bps:
@@ -10,7 +10,7 @@ void setup() {
 }
 
 void loop() {
-    int val = analogRead(A0);
+    int val = analogRead(sensorPin);
     Serial.println(val);
     // delay 100ms, to avoid jamming up the serial line and get useful values
     delay(100);
