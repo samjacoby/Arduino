@@ -4,14 +4,15 @@
 //       (touch input) pb4 -+   +- pb1 (fading while touching)
 //                  ground -+---+- pb0 (fading always)
 
-byte touchPins[] = { PB2, PB3, PB4, PB1 };//, PB5};
-byte ledPins[] = { 
-  PB0};
+byte touchPins[] ={ 8, 9, 10, 11 };//, PB5};
+byte ledPins[] = { 13 };
 
 int calibration[sizeof(touchPins)];
 
 void setup()
 {
+  
+  Serial.begin(9600);
 
   CLKPR = (1 << CLKPCE);
   CLKPR = 0;
@@ -35,9 +36,8 @@ void initialize() {
 }
 
 void calibrate() {
+  
   byte i, j;
-
-  int max = 0;
   
   for(j = 0; j < sizeof(touchPins); j++) {
     
@@ -47,9 +47,13 @@ void calibrate() {
       delay(200);
     }
   
-  calibration[j] = (calibration[j] + 4 * sizeof(touchPins)) / (8 * sizeof(touchPins));
+    calibration[j] = (calibration[j] + 4) / 8;
   }
   
+  for(j = 0; j < sizeof(touchPins); j++) {
+    
+    Serial.println(calibration[j]);
+  }  
   
   digitalWrite(ledPins[0], HIGH);
   delay(500);
@@ -62,7 +66,12 @@ void loop()
   byte i, n;
   for(i = 0; i < sizeof(touchPins); i++) {
     n = chargeTimeR(touchPins[i]);
-
+    
+    Serial.print("pin");
+    Serial.print(i);
+    Serial.print(": val");
+    Serial.println(n);
+    
     if (n > calibration[i]) {
       digitalWrite(ledPins[0], HIGH);
       do {
@@ -83,7 +92,7 @@ int chargeTimeR(byte pin) {
   time = 0;
   for(i = 0; i < 4; i++) {
     time += chargeTime(pin);
-    delay(200);
+    delayMicroseconds(500);
   }
   return time;
 }
@@ -91,9 +100,8 @@ int chargeTimeR(byte pin) {
 
 byte chargeTime(byte pin)
 {
-  byte mask = (1 << pin);
-  byte i;
-
+  byte mask, i;
+  mask = digitalPinToBitMask(pin);
   DDRB &= ~mask; // input
   PORTB |= mask; // pull-up on
 
