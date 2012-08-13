@@ -12,7 +12,7 @@ int calibration[sizeof(touchPins)];
 
 void setup()
 {
-
+ 
   CLKPR = (1 << CLKPCE);
   CLKPR = 0;
 
@@ -62,7 +62,7 @@ void loop()
   byte i, n;
   for(i = 0; i < sizeof(touchPins); i++) {
     n = chargeTimeR(touchPins[i]);
-
+    
     if (n > calibration[i]) {
       digitalWrite(ledPins[0], HIGH);
       do {
