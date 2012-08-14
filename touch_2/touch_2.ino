@@ -1,13 +1,14 @@
-//                        attiny85
-//                   reset -+---+- power
-// (on while touching) pb3 -+*  +- pb2 (toggled by touch)
-//       (touch input) pb4 -+   +- pb1 (fading while touching)
-//                  ground -+---+- pb0 (fading always)
+//                  +-\/-+
+// Ain0 RESET(D 5) PB5   1|    |8  Vcc
+// Ain3 (D 3) PB3  2|    |7  PB2 (D 2)  Ain1
+// Ain2 (D 4) PB4  3|    |6  PB1 (D 1) pwm1
+//            GND  4|    |5  PB0 (D 0) pwm0
+//                  +----+
 
 #define TIMEOUT 10000
 
-byte touchPins[] ={ 1, 2, 3, 4, 5};//, PB5};
-byte ledPins[] = { 0 };
+byte touchPins[] ={ 3, 4, 5 };//, PB5};
+byte ledPins[] = { 0, 1, 2 };
 
 int calibration[sizeof(touchPins)];
 
