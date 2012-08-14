@@ -6,7 +6,7 @@
 
 #define TIMEOUT 10000
 
-byte touchPins[] ={ 1, 2, 3, 4 };//, PB5};
+byte touchPins[] ={ 1, 2, 3, 4, 5};//, PB5};
 byte ledPins[] = { 0 };
 
 int calibration[sizeof(touchPins)];
@@ -41,6 +41,11 @@ void calibrate() {
   
   byte i, j;
   
+  digitalWrite(ledPins[0], HIGH);
+  delay(500);
+  digitalWrite(ledPins[0], LOW);
+  delay(500);
+  
   for(j = 0; j < sizeof(touchPins); j++) {
 
     for (i = 0; i < 8; i++) {
@@ -62,7 +67,7 @@ void calibrate() {
 
 void loop()
 {
-  int last;
+  long last;
   byte i, n;
   for(i = 0; i < sizeof(touchPins); i++) {
     
@@ -74,7 +79,7 @@ void loop()
       last = millis();
     
       do {
-        delayMicroseconds(500);
+        delay(2);
         n = chargeTimeR(touchPins[i]);
         if(millis() - last > TIMEOUT) {
           calibrate();
