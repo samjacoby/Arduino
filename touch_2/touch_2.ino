@@ -76,7 +76,7 @@ void loop()
     
     if (n > calibration[i]) {
     
-      digitalWrite(ledPins[0], HIGH);
+      digitalWrite(ledPins[i], HIGH);
       last = millis();
     
       do {
@@ -87,9 +87,9 @@ void loop()
           break;
         }
       } while (n > calibration[i]);     
-      digitalWrite(ledPins[0], LOW);
+      digitalWrite(ledPins[i], LOW);
     } else {
-      digitalWrite(ledPins[0], LOW);
+      digitalWrite(ledPins[i], LOW);
     }
     
     delayMicroseconds(500);
