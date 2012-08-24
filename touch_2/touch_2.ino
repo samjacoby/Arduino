@@ -19,7 +19,7 @@ void setup()
   CLKPR = 0;
 
   // Need a minute to get fingers outt've the way. 
-  delay(5000);
+  delay(1000);
   initialize();
   calibrate();
 
