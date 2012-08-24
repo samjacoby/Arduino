@@ -1,0 +1,4 @@
+avrispmkiif.name=AVRISP mkII (forcing)
+avrispmkiif.communication=usb
+avrispmkiif.protocol=stk500v2
+avrispmkiif.force=true
