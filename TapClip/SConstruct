@@ -69,7 +69,8 @@ else:
     # For Ubuntu Linux (9.10 or higher)
     print "HI!"
     ARDUINO_HOME_DEFAULT = '/usr/share/arduino/' 
-    ARDUINO_PORT_DEFAULT = getUsbTty('/dev/ttyUSB*')
+    #ARDUINO_PORT_DEFAULT = getUsbTty('/dev/ttyUSB*')
+    ARDUINO_PORT_DEFAULT = 'usb' 
     AVR_BIN_PREFIX='/usr/share/arduino/hardware/tools/avr/bin/avr-'
     #AVR_BIN_PREFIX = 'avr-'
     SKETCHBOOK_HOME_DEFAULT = '/home/sjacoby/Development/Arduino/'
@@ -329,12 +330,12 @@ if UPLOAD_PROTOCOL == 'stk500':
     UPLOAD_PROTOCOL = 'stk500v1'
 
 
-avrdudeOpts = ['-V', '-F', '-c %s' % UPLOAD_PROTOCOL, '-b %s' % UPLOAD_SPEED,
+avrdudeOpts = ['-V', '-F', '-c %s' % 'avrispmkII', '-b %s' % UPLOAD_SPEED,
     '-p %s' % MCU, '-P %s' % ARDUINO_PORT, '-U flash:w:$SOURCES']
 if AVRDUDE_CONF:
     avrdudeOpts.append('-C %s' % AVRDUDE_CONF)
 
-fuse_cmd = '%s %s' % (pathJoin(os.path.dirname(AVR_BIN_PREFIX), 'avrdude'),
+fuse_cmd = '%s %s' % (pathJoin('avrdude'),
                      ' '.join(avrdudeOpts))
 
 upload = envArduino.Alias('upload', TARGET + '.hex', [reset_cmd, fuse_cmd])
