@@ -75,21 +75,22 @@ void loop() {
 
             touchMask |= _BV(touchClips[i]);
             digitalWrite(PIN1, HIGH);
-            Serial.println(touchMask);
 
         }
     
     }
 
     if(touchMask != 0) {
+        //Serial.write(touchMask);
         Serial.write(touchMask);
+        Serial.flush();
         digitalWrite(PIN2, HIGH);
     } else {
         digitalWrite(PIN1, LOW);
     }
 
-    digitalWrite(PIN2, LOW);
 
     delay(10);
+    digitalWrite(PIN2, LOW);
 
 }
