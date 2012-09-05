@@ -18,9 +18,9 @@
 #define BM1 1
 #define BM2 2
 
-#define START  0xfe
+#define PRESS  0xfe
 #define END    0xdc
-#define VAL    0x81
+#define VALUE    0x81
   
 
 
@@ -44,39 +44,41 @@ void setup() {
 
 }
 
+byte prevMask;
+
 void loop() {
+  
     uint8_t i;
     
-    byte touchMask = 0x00;
-    byte actionMask = VAL;
+    byte touchMask = 0x00;  
+    byte actionMask;
 
     long totalVal[NUMPINS];
-
-
-    long totalVal_prev[NUMPINS];
-
-    long start = millis();
 
     totalVal[0] =  cs_1.capSense(SENSITIVITY);
     totalVal[1] =  cs_2.capSense(SENSITIVITY);
     totalVal[2] =  cs_3.capSense(SENSITIVITY);
 
 
+    // Get the current state of the pins
     for(i = 0; i < NUMPINS; i++ ) {
-
         if(totalVal[i] > THRESHOLD) {
-
             touchMask |= 1 << touchClips[i];
             digitalWrite(PIN1, HIGH);
-
         }
     
     }
-
-   
-    Serial.write(touchMask);
+    
+    if(prevMask != touchMask) {
+      
+      Serial.write(PRESS);
+      Serial.write(touchMask);  
+      
+    }
+    
     Serial.flush();
  
+    prevMask = touchMask;
 
     delay(100);
 
