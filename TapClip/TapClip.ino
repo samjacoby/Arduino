@@ -50,7 +50,10 @@ void loop() {
   
     uint8_t i;
     
+    byte serialBuffer[4];
+    
     byte touchMask = 0x00;  
+    byte valueMask[NUMPINS];
     byte actionMask;
 
     long totalVal[NUMPINS];
@@ -62,24 +65,27 @@ void loop() {
 
     // Get the current state of the pins
     for(i = 0; i < NUMPINS; i++ ) {
+      
         if(totalVal[i] > THRESHOLD) {
             touchMask |= 1 << touchClips[i];
             digitalWrite(PIN1, HIGH);
         }
-    
+        
+        serialBuffer[i + 1] = map(0, 1023, 0, 255, totalVal[i]);
     }
     
     if(prevMask != touchMask) {
-      
-      Serial.write(PRESS);
-      Serial.write(touchMask);  
-      
+      serialBuffer[0] = PRESS;
+      serialBuffer[1] = touchMask;
+    } else {
+      serialBuffer[0] = VALUE;
     }
     
+    Serial.write(serialBuffer, 4);
     Serial.flush();
  
     prevMask = touchMask;
 
-    delay(100);
+    delay(20);
 
 }
