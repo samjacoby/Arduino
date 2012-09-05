@@ -11,9 +11,9 @@
 #define PIN1 8
 #define PIN2 9
 
-CapSense   cs_4_2 = CapSense(A1,A0);        // 10M resistor between pins 4 & 2, pin 2 is sensor pin, add a wire and or foil if desired
-CapSense   cs_4_6 = CapSense(A3,A2);        // 10M resistor between pins 4 & 6, pin 6 is sensor pin, add a wire and or foil
-CapSense   cs_4_8 = CapSense(A5,A4);        // 10M resistor between pins 4 & 8, pin 8 is sensor pin, add a wire and or foil
+CapSense   cs_4_2 = CapSense(A1,A0);       
+CapSense   cs_4_6 = CapSense(A3,A2); 
+CapSense   cs_4_8 = CapSense(A5,A4);  
 
 void setup()                    
 {
