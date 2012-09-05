@@ -8,39 +8,89 @@
  * Receive pin is the sensor pin - try different amounts of foil/metal on this pin
  */
 
-#define PIN1 8
-#define PIN2 9
+#define THRESHOLD 500
 
-CapSense   cs_4_2 = CapSense(A1,A0);       
-CapSense   cs_4_6 = CapSense(A3,A2); 
-CapSense   cs_4_8 = CapSense(A5,A4);  
+#define PIN1 8 //LED
+#define PIN2 9 //LED
 
-void setup()                    
-{
-  // cs_4_2.set_CS_AutocaL_Millis(0xFFFFFFFF);     // turn off autocalibrate on channel 1 - just as an example
-   pinMode(PIN1, OUTPUT);
-   pinMode(PIN2, OUTPUT);
-   Serial.begin(9600);
+#define BM0 0
+#define BM1 1
+#define BM2 2
+
+
+// CapSense pins
+int sensePins[] = { A2, A0, A4 };
+int loadPins[] = { A3, A1, A5 };
+
+// Bit values of clips, to bitshift things correctly for serial
+int touchClips[] = { BM0, BM1, BM2 };
+
+CapSense   cs_4_2 = CapSense(A3,A2);        
+CapSense   cs_4_6 = CapSense(A1,A0);       
+CapSense   cs_4_8 = CapSense(A5,A4);      
+
+void setup() {
+
+    pinMode(PIN1, OUTPUT);
+    pinMode(PIN2, OUTPUT);
+
+    Serial.begin(9600);
+
 }
 
-void loop()                    
-{
+void loop() {
+    uint8_t i;
+    byte touchMask = 0x00;
+    long totalVal[sizeof(sensePins)];
+    long totalVal_prev[sizeof(sensePins)];
+/*    Serial.println("!!!");
+    Serial.println(sizeof(sensePins));
+    Serial.println(sizeof(int));
+    */
+
     long start = millis();
-    long total1 =  cs_4_2.capSense(30);
-    long total2 =  cs_4_6.capSense(30);
-    long total3 =  cs_4_8.capSense(30);
 
-    Serial.print(millis() - start);        // check on performance in milliseconds
-    Serial.print("\t");                    // tab character for debug windown spacing
+    totalVal[0] =  cs_4_2.capSense(30);
+    totalVal[1] =  cs_4_6.capSense(30);
+    totalVal[2] =  cs_4_8.capSense(30);
 
-    Serial.print(total1);                  // print sensor output 1
-    Serial.print("\t");
-    Serial.print(total2);                  // print sensor output 2
-    Serial.print("\t");
-    Serial.println(total3);                // print sensor output 3
-        digitalWrite(PIN1, HIGH);
-        delay(1000);                             // arbitrary delay to limit data to serial port 
-    digitalWrite(PIN1, LOW);
-    delay(1000);                             // arbitrary delay to limit data to serial port 
+
+    //Serial.print(millis() - start);        // check on performance in milliseconds
+    //Serial.print(",");                    // tab character for debug windown spacing
+    /*
+    Serial.print(totalVal[0]);                  // print sensor output 1
+    Serial.print(",");
+    Serial.print(totalVal[1]);                  // print sensor output 2
+    Serial.print(",");
+    Serial.println(totalVal[2]);                // print sensor output 3
+    */
+
+
+    for(i = 0; i < (sizeof(sensePins) / sizeof(int)); i++ ) {
+
+        //Serial.println(totalVal[i]);                  // print sensor output 1
+        //Serial.println(i);
+
+        if(totalVal[i] > THRESHOLD) {
+
+            touchMask |= _BV(touchClips[i]);
+            digitalWrite(PIN1, HIGH);
+
+        }
+    
+    }
+
+    if(touchMask != 0) {
+        //Serial.write(touchMask);
+        Serial.write(touchMask);
+        Serial.flush();
+        digitalWrite(PIN2, HIGH);
+    } else {
+        digitalWrite(PIN1, LOW);
+    }
+
+
+    delay(10);
+    digitalWrite(PIN2, LOW);
 
 }
