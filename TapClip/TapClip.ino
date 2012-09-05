@@ -18,9 +18,9 @@
 #define BM1 1
 #define BM2 2
 
-#define PRESS  0xfe
-#define END    0xdc
-#define VALUE    0x81
+#define PRESS  0x33
+#define END    0xff
+#define VALUE    0xcc
   
 
 
@@ -81,7 +81,10 @@ void loop() {
       serialBuffer[0] = VALUE;
     }
     
-    Serial.write(serialBuffer, 4);
+    // endbyte
+    serialBuffer[4] = 0xff;
+    
+    Serial.write(serialBuffer, 5);
     Serial.flush();
  
     prevMask = touchMask;
