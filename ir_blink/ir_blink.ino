@@ -11,6 +11,9 @@
 #define FLICKER 3750
 
 volatile uint8_t ir_count;
+volatile uint16_t sound;
+
+boolean dataRead;
 
 void setup(void) {
 
@@ -51,12 +54,11 @@ ISR(TIMER1_COMPA_vect) {
 
     count = (count + 1) & 0b00111111;
 
-    PORTB ^= (1 << PB4);
+    PORTB ^= (1 << 12);
     
     if(count < ir_count) { 
-        DDRD |= 1 << PD5;
+        DDRD |= 1 << 5;
     } else {
-        PORTB |= (1 << PB3);
         DDRD &= 0;
     }
 
@@ -76,18 +78,25 @@ void loop() {
         _delay_ms(15);
     }
     _delay_ms(60);
-}
 
-boolean dataRead;
+/*    if(dataRead) {
+        ir_count = map(0, 100, 0, 64, 100);      
+        dataRead = false;
+    }
+    */
+}
+/*
 void serialEvent() {
-    
+
+    char* dataString = "";
     while (Serial.available()) {
         char c = (char) Serial.read();
-        //do some mapping
-        //
+        dataString += c;
         if(c = '\n') {
             dataRead = true; 
+            sound = atoi(dataString);
         }
-
     }
+
 }
+*/
