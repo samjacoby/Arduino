@@ -1,18 +1,19 @@
 //                        attiny85
-//                   reset -+---+- power
-// (on while touching) pb3 -+*  +- pb2 (toggled by touch)
-//       (touch input) pb4 -+   +- pb1 (fading while touching)
-//                  ground -+---+- pb0 (fading always)
+//                   reset:1 -+---+- 8:power
+// (on while touching) pb3:2 -+*  +- 7:pb2 (toggled by touch)
+//       (touch input) pb4:3 -+   +- 6:pb1 (fading while touching)
+//                  ground:4 -+---+- 5:pb0 (fading always)
 
-byte touchPins[] ={ 8, 9, 10, 11 };//, PB5};
-byte ledPins[] = { 13 };
+byte touchPins[] ={ 2,1 };//, PB5};
+byte ledPins[] = { 3,4,2 };
 
+// Calibrate each pin separately.
 int calibration[sizeof(touchPins)];
 
 void setup()
 {
   
-  Serial.begin(9600);
+  //Serial.begin(9600);
 
   CLKPR = (1 << CLKPCE);
   CLKPR = 0;
@@ -50,10 +51,10 @@ void calibrate() {
     calibration[j] = (calibration[j] + 4) / 8;
   }
   
-  for(j = 0; j < sizeof(touchPins); j++) {
+  /*for(j = 0; j < sizeof(touchPins); j++) {
     
     Serial.println(calibration[j]);
-  }  
+  }*/  
   
   digitalWrite(ledPins[0], HIGH);
   delay(500);
@@ -67,10 +68,12 @@ void loop()
   for(i = 0; i < sizeof(touchPins); i++) {
     n = chargeTimeR(touchPins[i]);
     
+    /*
     Serial.print("pin");
     Serial.print(i);
     Serial.print(": val");
     Serial.println(n);
+    */
     
     if (n > calibration[i]) {
       digitalWrite(ledPins[0], HIGH);
