@@ -1,21 +1,21 @@
 //                        attiny85
-//                   reset:1 -+---+- 8:power
-//       (touch input) pb3:2 -+*  +- 7:pb2 (fading always)
-//       (touch input) pb4:3 -+   +- 6:pb1 (touch something)
-//                  ground:4 -+---+- 5:pb0 (touch something else)
+//                   reset   -+---+-  power
+//       (touch input) pb3:3 -+*  +- 2:pb2 (fading always)
+//       (touch input) pb4:4 -+   +- 1:pb1 (touch something)
+//                  ground   -+---+- 0:pb0 (touch something else)
 
 byte touchPins[] ={ 2,3 };//, PB5};
 byte ledPins[] = { 5,6,7 };
 
-byte fadePin = 7;
-int faveval = 0, fadestep = 1;
+byte fadepin = 7;
+int fadeval = 0, fadestep = 1;
 
 // Calibrate each pin separately
 int calibration[sizeof(touchPins)];
 
 void setup()
 {
-  
+
   //Serial.begin(9600);
 
   CLKPR = (1 << CLKPCE);
@@ -29,7 +29,7 @@ void setup()
 void initialize() {
 
   byte i, j; 
-  
+
   for(i = 0; i < sizeof(touchPins); i++) {
     pinMode(touchPins[i], INPUT);  
   }
@@ -40,26 +40,26 @@ void initialize() {
 }
 
 void calibrate() {
-  
+
   byte i, j;
-  
+
   for(j = 0; j < sizeof(touchPins); j++) {
-    
+
     for (i = 0; i < 8; i++) {
-      
+
       calibration[j] += chargeTimeR(touchPins[j]);
       delay(200);
     }
-  
+
     calibration[j] = (calibration[j] + 4) / 8;
   }
-  
+
   // Signal calibration complete
   for(i=0;i< 5;i++) {
-      digitalWrite(ledPins[0], HIGH);
-      delay(100);
-      digitalWrite(ledPins[0], LOW);
-      delay(100);
+    digitalWrite(fadepin, HIGH);
+    delay(100);
+    digitalWrite(fadepin, LOW);
+    delay(100);
   }
 }
 
@@ -73,21 +73,23 @@ void loop()
   fadeval = fadeval + fadestep;
 
   byte i, n;
-    // Scan all of the touchpins 
-    for(i = 0; i < sizeof(touchPins); i++) {
+  // Scan all of the touchpins 
+  for(i = 0; i < sizeof(touchPins); i++) {
+    n = chargeTimeR(touchPins[i]);
+
+    if (n > calibration[i]) {
+      digitalWrite(ledPins[i], HIGH);
+      do {
+        delayMicroseconds(500);
         n = chargeTimeR(touchPins[i]);
-    
-        if (n > calibration[i]) {
-            digitalWrite(ledPins[i], HIGH);
-            do {
-                delayMicroseconds(500);
-                n = chargeTimeR(touchPins[i]);
-            } while (n > calibration[i]);     
-            digitalWrite(ledPins[i], LOW);
-        } else {
-            digitalWrite(ledPins[i], LOW);
-        }
-    
+      } 
+      while (n > calibration[i]);     
+      digitalWrite(ledPins[i], LOW);
+    } 
+    else {
+      digitalWrite(ledPins[i], LOW);
+    }
+
     delayMicroseconds(500);
   }
 }
@@ -119,5 +121,6 @@ byte chargeTime(byte pin)
 
   return i;
 }
+
 
 
