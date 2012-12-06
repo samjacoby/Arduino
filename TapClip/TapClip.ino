@@ -8,7 +8,7 @@
  */
 
 #define THRESHOLD 900
-#define SENSITIVITY 30
+#define SENSITIVITY 100
 #define NUMPINS sizeof(sP)/sizeof(int)
 
 #define PIN1 8 //LED
@@ -21,12 +21,10 @@
 #define BM4 4
 
 
+#define START  0x33
+#define END    0x0A 
 
-
-
-#define PRESS  0x33
-#define END    0xff
-#define VALUE    0xcc
+#define VALUE 0xcc
   
 
 
@@ -67,7 +65,6 @@ void loop() {
     
     byte touchMask = 0x00;  
     byte valueMask[NUMPINS];
-    byte actionMask;
 
     long totalVal[NUMPINS];
 
@@ -114,13 +111,14 @@ void loop() {
     
     if(prevMask != touchMask) {
       serialBuffer[0] = PRESS;
-      serialBuffer[1] = touchMask;
+      serialBuffer[1] = touchMask; 
     } else {
       serialBuffer[0] = VALUE;
     }
     
     // endbyte
-    serialBuffer[6] = 0xff;
+    // serialBuffer[6] = checksum
+    serialBuffer[7] = 0x0a;
     
     Serial.write(serialBuffer, 7);
     Serial.flush();
