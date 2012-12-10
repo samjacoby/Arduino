@@ -21,7 +21,7 @@
 #define BM4 4
 
 
-#define START  0x33
+#define START  0xFE
 #define END    0x0A 
 
 #define VALUE 0xcc
@@ -46,7 +46,7 @@ void setup() {
     pinMode(PIN1, OUTPUT);
     pinMode(PIN2, OUTPUT);
 
-    Serial.begin(9600);
+    Serial.begin(57600);
 
 }
 
@@ -61,7 +61,7 @@ void loop() {
   
     uint8_t i;
     
-    byte serialBuffer[7];
+    byte serialBuffer[8];
     
     byte touchMask = 0x00;  
     byte valueMask[NUMPINS];
@@ -106,21 +106,24 @@ void loop() {
             digitalWrite(PIN2, HIGH);
         }
         
-        serialBuffer[i + 1] = map(0, 1023, 0, 255, totalVal[i]);
+        serialBuffer[i + 2] = map(0, 1023, 0, 255, totalVal[i]);
     }
-    
+   /* // Just send touchmask, not values
     if(prevMask != touchMask) {
       serialBuffer[0] = PRESS;
       serialBuffer[1] = touchMask; 
     } else {
       serialBuffer[0] = VALUE;
-    }
+    }*/
     
-    // endbyte
-    // serialBuffer[6] = checksum
-    serialBuffer[7] = 0x0a;
+    // Set start and end bytes
+    serialBuffer[0] = START;
+    serialBuffer[6] = END;
+
+    // Add touchmask
+    serialBuffer[1] = touchMask;
     
-    Serial.write(serialBuffer, 7);
+    Serial.write(serialBuffer, 8);
     Serial.flush();
  
     prevMask = touchMask;
