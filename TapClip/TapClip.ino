@@ -14,23 +14,23 @@
 #define PIN1 8 //LED
 #define PIN2 9 //LED
 
-#define BM0 1
-#define BM1 0
+#define BM0 0
+#define BM1 1
 #define BM2 2
 #define BM3 3
 #define BM4 4
 
 
 #define START  0xFE
-#define END    0x0A 
+#define END    0x71 
 
 #define VALUE 0xcc
   
 
 
 // CapSense pins
-int sP[] = { A2, A0, A4, 3, 5 };
-int lP[] = { A3, A1, A5, 4,  6 };
+int sP[] = { A0, A2, A4, 3, 5 };
+int lP[] = { A1, A3, A5, 4,  6 };
 
 // Bit values of clips, to bitshift things correctly for serial
 int touchClips[] = { BM0, BM1, BM2, BM3, BM4 };
@@ -106,6 +106,7 @@ void loop() {
             digitalWrite(PIN2, HIGH);
         }
         
+        // Populate buffer
         serialBuffer[i + 2] = map(0, 1023, 0, 255, totalVal[i]);
     }
    /* // Just send touchmask, not values
@@ -118,7 +119,7 @@ void loop() {
     
     // Set start and end bytes
     serialBuffer[0] = START;
-    serialBuffer[6] = END;
+    serialBuffer[7] = END;
 
     // Add touchmask
     serialBuffer[1] = touchMask;

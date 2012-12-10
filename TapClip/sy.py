@@ -8,7 +8,7 @@ class TapSerial:
         self.serial = serial.Serial(port, 57600)
 
     def read(self):
-        resp = self.serial.read(7)
+        resp = self.serial.read(8)
         self.serial.flushInput();
         print repr(resp)
 
