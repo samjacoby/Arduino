@@ -8,7 +8,7 @@
  */
 
 #define THRESHOLD 900
-#define SENSITIVITY 100
+#define SENSITIVITY 10
 #define NUMPINS sizeof(sP)/sizeof(int)
 
 #define PIN1 8 //LED
