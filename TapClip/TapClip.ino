@@ -8,7 +8,7 @@
  */
 
 #define THRESHOLD 900
-#define SENSITIVITY 10
+#define SENSITIVITY 30
 #define NUMPINS sizeof(sP)/sizeof(int)
 
 #define PIN1 8 //LED
@@ -25,21 +25,27 @@
 #define END    0x71 
 
 #define VALUE 0xcc
-  
-
 
 // CapSense pins
 int sP[] = { A0, A2, A4, 3, 5 };
 int lP[] = { A1, A3, A5, 4,  6 };
 
+CapSense cPins [] = {CapSense(lP[0], sP[0]), CapSense(lP[1], sP[1]),CapSense(lP[2], sP[2]),CapSense(lP[3], sP[3]),CapSense(lP[4], sP[4])}; 
+
 // Bit values of clips, to bitshift things correctly for serial
 int touchClips[] = { BM0, BM1, BM2, BM3, BM4 };
-
 CapSense   cs_1 = CapSense(lP[0], sP[0]);        
 CapSense   cs_2 = CapSense(lP[1], sP[1]);       
 CapSense   cs_3 = CapSense(lP[2], sP[2]);      
 CapSense   cs_4 = CapSense(lP[3], sP[3]);      
 CapSense   cs_5 = CapSense(lP[4], sP[4]);      
+/*
+cPins[0] = cs_1;
+cPins[1] = cs_2;
+cPins[2] = cs_3;
+cPins[3] = cs_4;
+cPins[4] = cs_5;
+*/
 
 void setup() {
 
@@ -57,46 +63,40 @@ void setAsInput(int l, int s) {
   pinMode(s, INPUT);  
 }
 
+int inByte;
 void loop() {
-  
+
     uint8_t i;
-    
+
     byte serialBuffer[8];
-    
     byte touchMask = 0x00;  
-    byte valueMask[NUMPINS];
 
     long totalVal[NUMPINS];
+    long MAX = 1024;
 
-    pinMode(lP[0], OUTPUT);
-    totalVal[0] =  cs_1.capSense(SENSITIVITY);
-    setAsInput(lP[0], sP[0]);
-    //Serial.println("0");
-    //Serial.println(totalVal[0]);
+    char buffer[40];
 
-    pinMode(lP[1], OUTPUT);
-    totalVal[1] =  cs_2.capSense(SENSITIVITY);
-    setAsInput(lP[1], sP[1]);
-    //Serial.println("1");
-    //Serial.println(totalVal[1]);
-
-    pinMode(lP[2], OUTPUT);
-    totalVal[2] =  cs_3.capSense(SENSITIVITY);
-    setAsInput(lP[2], sP[2]);
-    //Serial.println("2");
-    //Serial.println(totalVal[2]);
-
-    pinMode(lP[3], OUTPUT);
-    totalVal[3] =  cs_4.capSense(SENSITIVITY);
-    setAsInput(lP[3], sP[3]);
-    //Serial.println("4");
-    //Serial.println(totalVal[3]);
-
-    pinMode(lP[4], OUTPUT);
-    totalVal[4] =  cs_5.capSense(SENSITIVITY);
-    setAsInput(lP[4], sP[4]);
-    //Serial.println("4");
-    //Serial.println(totalVal[4]);
+    // reset calibration on all pins
+    if(Serial.available() > 0) {
+        inByte = Serial.read();
+        for(i=0;i<5;i++) {
+            digitalWrite(PIN2, HIGH);
+            cPins[i].reset_CS_AutoCal();
+            digitalWrite(PIN2, LOW);
+        }
+    }
+    
+    // Scan across all pins in sequence
+    for( i = 0; i < NUMPINS; i++) {
+        pinMode(lP[i], OUTPUT);
+        totalVal[i] = cPins[i].capSense(SENSITIVITY);
+    
+        setAsInput(lP[i], sP[i]); 
+        //Serial.println(totalVal[i]);
+    
+    }
+    int n=sprintf(buffer, "%ld, %ld, %ld, %ld, %ld", totalVal[0], totalVal[1], totalVal[2], totalVal[3], totalVal[4]);
+    //Serial.println(buffer);
 
     // Get the current state of the pins
     for(i = 0; i < NUMPINS; i++ ) {
@@ -107,15 +107,10 @@ void loop() {
         }
         
         // Populate buffer
-        serialBuffer[i + 2] = map(0, 1023, 0, 255, totalVal[i]);
+        serialBuffer[i + 2] = map(totalVal[i], 0, MAX, 0, 255);
     }
-   /* // Just send touchmask, not values
-    if(prevMask != touchMask) {
-      serialBuffer[0] = PRESS;
-      serialBuffer[1] = touchMask; 
-    } else {
-      serialBuffer[0] = VALUE;
-    }*/
+    n=sprintf(buffer, "%d, %d, %d, %d, %d", serialBuffer[0+2], serialBuffer[1+2], serialBuffer[2+2], serialBuffer[3+2], serialBuffer[4+2]);
+    //Serial.println(buffer);
     
     // Set start and end bytes
     serialBuffer[0] = START;
