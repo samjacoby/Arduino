@@ -8,10 +8,9 @@
  * Resistor effects sensitivity, experiment with values, 50K - 50M. Larger resistor values yield larger sensor values.
  */
 
-#define DEBUG
 
 #define THRESHOLD 900
-#define SENSITIVITY 30
+#define SENSITIVITY 100
 #define NUMPINS sizeof(sP)/sizeof(int)
 
 #define PIN1 8 //LED
@@ -29,7 +28,7 @@
 
 #define VALUE 0xcc
 
-const int NUMSAMPLES = 5;
+const int NUMSAMPLES = 10;
 
 // CapSense pins
 int sP[] = { A0, A2, A4, 3, 5 };
@@ -37,6 +36,7 @@ int lP[] = { A1, A3, A5, 4,  6 };
 
 CapSense cPins [] = {CapSense(lP[0], sP[0]), CapSense(lP[1], sP[1]),CapSense(lP[2], sP[2]),CapSense(lP[3], sP[3]),CapSense(lP[4], sP[4])}; 
 long cPinsMax[] = {0,0,0,0,0};
+long totalVal[] = {0,0,0,0,0};
 long lastRead[NUMPINS][NUMSAMPLES];
 
 // Bit values of clips, to bitshift things correctly for the touchmask 
@@ -63,18 +63,19 @@ void setup() {
 byte prevMask;
 
 int inByte;
+long sensorRead;
+uint8_t j = 0;
 void loop() {
 
-    uint8_t i;
-    uint8_t j;
+    uint8_t i = 0;
 
     byte serialBuffer[8];
     byte touchMask = 0x00;  
 
     
     long removeVal;
-    long totalVal[] = {0,0,0,0,0};
     long MAX = 1024;
+    long movingAvg[5];
 
     char buffer[40];
 
@@ -82,7 +83,7 @@ void loop() {
     // reset calibration on all pins
     if(Serial.available() > 0) {
         inByte = Serial.read();
-        for(i=0;i<cPins[i].length;i++) {
+        for(i=0;i < NUMPINS;i++) {
             digitalWrite(PIN2, HIGH);
             cPins[i].reset_CS_AutoCal();
             digitalWrite(PIN2, LOW);
@@ -90,40 +91,41 @@ void loop() {
     }
 
     // read the actual sensors and keep your hat on
+    int n;
     for(i = 0; i < NUMPINS; i++) {
         pinMode(lP[i], OUTPUT);
         sensorRead = cPins[i].capSense(SENSITIVITY);
         lastRead[i][j] = sensorRead; // store last value in the right place
         totalVal[i] += sensorRead;  // keep running total
-        cPinsMax[i] = (totalVal[i] > cPinsMax[i]) ? totalVal[i] : cPinsMax[i];
+        cPinsMax[i] = (sensorRead > cPinsMax[i]) ? sensorRead : cPinsMax[i];
         setAsInput(lP[i], sP[i]); 
-        removeVal = (j + 1) % NUMSAMPLES; // get the last value
-        totalVal[i] -= lastRead[i][j]; // remove value from running total
-        j = (j+1) % NUMSAMPLES; // keep track of running samples
+        totalVal[i] -= lastRead[i][(j+1)%NUMSAMPLES]; // remove value from running total
     }
+    j = (j + 1) % NUMSAMPLES; // get the last value
 
+    // grab moving average of each pin
     for(i = 0; i < NUMPINS; i++) {
-        totalVal[i] = totalVal[i] / NUMSAMPLES; 
+        movingAvg[i] = totalVal[i] / (NUMSAMPLES); 
     }
-
-
-
     #ifdef DEBUG
-    int n=sprintf(buffer, "%ld, %ld, %ld, %ld, %ld", totalVal[0], totalVal[1], totalVal[2], totalVal[3], totalVal[4]);
-    //Serial.println(buffer);
+    n=sprintf(buffer, "%ld, %ld, %ld, %ld, %ld", totalVal[0], totalVal[1], totalVal[2], totalVal[3], totalVal[4]);
+    Serial.println(buffer);
     #endif
+
+
+
 
     // Get the current state of the pins
 
     for(i = 0; i < NUMPINS; i++ ) {
       
-        if(totalVal[i] > THRESHOLD) {
+        if(movingAvg[i] > THRESHOLD) {
             touchMask |= 1 << touchClips[i];
             digitalWrite(PIN2, HIGH);
         }
         
-        // Populate buffer
-        serialBuffer[i + 2] = map(totalVal[i], 0, cPinsMax[i], 0, 255);
+        // Populate buffer and do mapping
+        serialBuffer[i + 2] = map(movingAvg[i], 0, cPinsMax[i], 0, 255);
         //serialBuffer[i + 2] = totalVal[i];
     }
 
@@ -141,13 +143,18 @@ void loop() {
     
     #ifndef DEBUG
     Serial.write(serialBuffer, 8);
-    #endif
     Serial.flush();
+    #endif
  
     prevMask = touchMask;
     
     delay(20);
     digitalWrite(PIN2, LOW);
+
+}
+
+void writeMessage(byte msg[]) {
+
 
 }
 
