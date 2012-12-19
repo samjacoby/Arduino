@@ -89,6 +89,7 @@ void loop() {
         }
     }
 
+    // read the actual sensors and keep your hat on
     for(i = 0; i < NUMPINS; i++) {
         pinMode(lP[i], OUTPUT);
         sensorRead = cPins[i].capSense(SENSITIVITY);
@@ -96,13 +97,13 @@ void loop() {
         totalVal[i] += sensorRead;  // keep running total
         cPinsMax[i] = (totalVal[i] > cPinsMax[i]) ? totalVal[i] : cPinsMax[i];
         setAsInput(lP[i], sP[i]); 
-        removeVal = (j + 1) % numSamples; // get the last value
+        removeVal = (j + 1) % NUMSAMPLES; // get the last value
         totalVal[i] -= lastRead[i][j]; // remove value from running total
-        j = (j+1) % numSamples; // keep track of running samples
+        j = (j+1) % NUMSAMPLES; // keep track of running samples
     }
 
-    for(i = 0; i <NUMPINS; i++) {
-        totalVal[i] = totalVal[i] / NUMPINS; 
+    for(i = 0; i < NUMPINS; i++) {
+        totalVal[i] = totalVal[i] / NUMSAMPLES; 
     }
 
 
