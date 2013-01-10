@@ -7,7 +7,7 @@
  * Uses a high value resistor e.g. 10M between send pin and receive pin
  * Resistor effects sensitivity, experiment with values, 50K - 50M. Larger resistor values yield larger sensor values.
  */
-
+//#define DEBUG
 
 #define THRESHOLD 900
 #define SENSITIVITY 100
@@ -28,7 +28,7 @@
 
 #define VALUE 0xcc
 
-const int NUMSAMPLES = 10;
+const int NUMSAMPLES = 5;
 
 // CapSense pins
 int sP[] = { A0, A2, A4, 3, 5 };
@@ -94,13 +94,16 @@ void loop() {
     int n;
     for(i = 0; i < NUMPINS; i++) {
         pinMode(lP[i], OUTPUT);
+
         sensorRead = cPins[i].capSense(SENSITIVITY);
         lastRead[i][j] = sensorRead; // store last value in the right place
         totalVal[i] += sensorRead;  // keep running total
-        cPinsMax[i] = (sensorRead > cPinsMax[i]) ? sensorRead : cPinsMax[i];
-        setAsInput(lP[i], sP[i]); 
+        cPinsMax[i] = (sensorRead > cPinsMax[i]) ? sensorRead : cPinsMax[i]; // keep track of the maximum reading on a given pin
         totalVal[i] -= lastRead[i][(j+1)%NUMSAMPLES]; // remove value from running total
+
+        setAsInput(lP[i], sP[i]);   // library doesn't. 
     }
+
     j = (j + 1) % NUMSAMPLES; // get the last value
 
     // grab moving average of each pin
@@ -126,7 +129,6 @@ void loop() {
         
         // Populate buffer and do mapping
         serialBuffer[i + 2] = map(movingAvg[i], 0, cPinsMax[i], 0, 255);
-        //serialBuffer[i + 2] = totalVal[i];
     }
 
     #ifdef DEBUG
