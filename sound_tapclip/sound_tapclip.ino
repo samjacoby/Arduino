@@ -1,4 +1,5 @@
 #include <CapSense.h>
+#include <limits.h>
 //Analog out
 //by Amanda Ghassaei
 //http://www.instructables.com/id/Arduino-Audio-Output/
@@ -12,31 +13,42 @@
  *
 */
 
+long sensorRead, maxSensorRead, minSensorRead;
 CapSense c = CapSense(A0, A1);
 void setup(){
-  //set digital pins 0-7 as outputs
+    maxSensorRead = 0;
+    minSensorRead = INT_MAX;
+    //set digital pins 0-7 as outputs
     for (int i=0;i<8;i++){
         pinMode(i,OUTPUT);
     }
+    Serial.begin(9600);
 }
 
-long sensorRead;
 long mappedSensorRead;
 int i;
 void loop(){
-    /*
-    for(int i=0; i<255; i++) {
-        PORTD = i;//send (0/255)*5 = 0V out DAC
-        delayMicroseconds(10);
-        
-    }
-    */
+
+
+
     sensorRead = c.capSense(30);
-    mappedSensorRead = map(sensorRead, 0, 10000, 400,800);
+    if(sensorRead > maxSensorRead) {
+        maxSensorRead = sensorRead;
+    }
+    if(sensorRead < minSensorRead) {
+        minSensorRead = sensorRead;
+    }
+
+    mappedSensorRead = map(sensorRead, minSensorRead, maxSensorRead, 0, 255);
     i = (int) mappedSensorRead;
     
-
-/*
+    /*
+    for(int i=0; i<255; i++) {
+        PORTD = i;
+        delayMicroseconds(10);
+    }
+    */
+    /*
     for(int i=400; i<800; i++) {
         PORTD = 0;
         delayMicroseconds(i);
@@ -50,9 +62,8 @@ void loop(){
         delayMicroseconds(i);
     }
     */
-        PORTD = 0;
-        delayMicroseconds(i);
-        PORTD = 255;
-        delayMicroseconds(i);
+    
+    PORTD = i;
+        
 }
 
