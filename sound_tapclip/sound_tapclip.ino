@@ -19,18 +19,20 @@ CapSense c = CapSense(A0, A1);
 void setup(){
 
     sei(); //enable interrupts (default enabled, I think?)
-    TCCR0A |= (1 << COM0A0) | (1 << WGM01); // CTC mode
+    //TCCR0A |= (1 << COM0A0) | (1 << WGM01); // CTC mode
+    TCCR0A |= (1 << WGM01); // CTC mode
 
     // set prescaling on timer
-    TCCR0B |= (1 << CS02) | (1 << CS00); 
+    TCCR0B |= (1 << CS01) | (1 << CS00); 
     TIMSK0 |= (1 << OCIE0A);
+
+    OCR0A = 255;
 
     maxSensorRead = 0;
     minSensorRead = INT_MAX;
     //set digital pins 0-7 as outputs
     DDRD = (1 << 6);
 
-    Serial.begin(9600);
 }
 
 long mappedSensorRead;
@@ -49,7 +51,7 @@ void loop(){
     mappedSensorRead = map(sensorRead, minSensorRead, maxSensorRead, 0, 255);
     i = (int) mappedSensorRead;
     */
-    i = 200;
+    i = 50;
 
     
    /* 
@@ -73,12 +75,10 @@ void loop(){
         delayMicroseconds(i);
     }
     */
-    
-    //PORTD = i;
         
 }
 
 ISR(TIMER0_COMPA_vect) {
     OCR0A = i;
-    PORTD ^= 64; 
+    PORTD ^= (1 << 6); 
 }
