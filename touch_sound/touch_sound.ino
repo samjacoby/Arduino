@@ -13,8 +13,10 @@ void setup() {
 }
 
 void timer0_init() {
+    TCCR0A = 1 << WGM01; 
     TCCR0B = (1 << CS01) | (1 << CS00);
     TIMSK0 = 1 << OCIE0B;
+    OCR0A = 48;
 
 }
 
@@ -25,10 +27,12 @@ void timer1_init() {
 
 
 int i, j;
-void loop() {}
+void loop() {
+}
 
 ISR(TIMER0_COMPB_vect) {
     PORTD ^= (1 << PIND0);
+    OCR0A++;
 }
 
 ISR(TIMER1_OVF_vect) {
