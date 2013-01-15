@@ -7,8 +7,9 @@ void setup() {
 
     pinMode(LED1, OUTPUT);
     pinMode(LED2, OUTPUT);
-    pcm_init();
+    //pcm_init();
 
+    DDRD = (1 << PIND0);
 }
 
 void pcm_init() {
@@ -24,13 +25,17 @@ void pcm_init() {
     OCR0A = 255;
     OCR0B = 32;
 
-    DDRD = (1 << PIND0);
 
 }
 
 void loop() {
-    for(int i = 64; i < 255; i++) {
-        OCR0A = i;
+
+    for(int j=1; j<10; j++) {
+        for(int i=0; i<255; i++) {
+            PORTD ^= (1 << PIND0);        
+            delayMicroseconds(i*j);
+        }
     }
+
 
 }
