@@ -78,7 +78,7 @@ void loop(){
         
 }
 
-ISR(TIMER0_COMPA_vect) {
+void ISR(TIMER0_COMPA_vect) {
     OCR0A = i;
     PORTD ^= (1 << 6); 
 }

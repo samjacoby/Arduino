@@ -11,8 +11,6 @@ void setup() {
 
 }
 
-
-
 void timer_init() {
     TCCR1B = (1 << CS12) | (1 << CS10);
     TIMSK1 = (1 << TOIE1);
@@ -20,15 +18,15 @@ void timer_init() {
 }
 
 
+int i, j;
 void loop() {
-    for(int j=1; j<10; j++) {
-        for(int i=0; i<255; i++) {
+    for(j=1; j<10;j++) {
+        for(i=0; i<255; i++) {
             PORTD ^= (1 << PIND0);        
             delayMicroseconds(i*j);
         }
     }
 }
-
 
 ISR(TIMER1_OVF_vect) {
     PORTF ^= (1 << PINF0) | (1 << PINF1);
