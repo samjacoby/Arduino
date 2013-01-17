@@ -7,9 +7,12 @@ void setup() {
 
     DDRF |= (1 << PINF1) | (1 << PINF0);
     DDRD = (1 << PIND0);
+    DDRC =0x00;
     timer0_init();
     timer1_init();
     sei();
+
+    Serial.begin(9600);
 }
 
 void timer0_init() {
@@ -26,13 +29,18 @@ void timer1_init() {
 }
 
 
-int i, j;
+int i, j, interval;
+
+CapSense c = CapSense(12, 4);
 void loop() {
+    long sensorRead, mappedRead;
+    sensorRead = c.capSense(1);
+    Serial.println(sensorRead);
 }
 
 ISR(TIMER0_COMPB_vect) {
-    PORTD ^= (1 << PIND0);
-    OCR0A++;
+        PORTD ^= (1 << PIND0);
+        OCR0A += interval;
 }
 
 ISR(TIMER1_OVF_vect) {
