@@ -24,20 +24,21 @@ void loop()
     total2 =  clip_two.capSense(5);
     total3 =  clip_three.capSense(5);
 
-    for(int i=0; i< SINETABLE_SIZE; i++) {
-        Serial.println(sinetable[i]);
-    
-    }
-
     sprintf(data_str, "%lu, %lu, %lu", total1, total2, total3);
     
     Serial.println(data_str);
     delay(10);
     OCR1A = 0x00f + total1 + total2 + total3; 
 
+    for(int i=0; i< SINETABLE_SIZE; i++) {
+        Serial.println(sinetable[i]);
+    }
+
+
 }
 
 void timer1_init() {
+
     DDRD |= (1 << PIND0);
     TCCR1A = (1 << WGM11) | (1 << WGM10);
     TCCR1B = (1 << WGM13) | (1 << CS10) ;   
