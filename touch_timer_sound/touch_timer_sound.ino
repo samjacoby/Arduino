@@ -1,14 +1,16 @@
 #include <CapSense.h>
+#include "sinetable.h"
 #include <stdio.h>
 
 CapSense clip_one = CapSense(9, 10);
 CapSense clip_two = CapSense(4, 12);
 CapSense clip_three = CapSense(13, 5);
+
 void setup() 
 {
    cli();
    timer1_init();
-//   timer0_init();
+   timer0_init();
    sei();
 
    Serial.begin(115200);
@@ -21,6 +23,11 @@ void loop()
     total1 =  clip_one.capSense(5);
     total2 =  clip_two.capSense(5);
     total3 =  clip_three.capSense(5);
+
+    for(int i=0; i< SINETABLE_SIZE; i++) {
+        Serial.println(sinetable[i]);
+    
+    }
 
     sprintf(data_str, "%lu, %lu, %lu", total1, total2, total3);
     
