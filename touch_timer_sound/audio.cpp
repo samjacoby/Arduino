@@ -17,6 +17,8 @@ void audio_init(void) {
 
 }
 
+
 void audio_output(uint8_t next_sample) {
+    // TODO: essentially, this should only set OCR1A. 
     OCR1A = next_sample; 
 }

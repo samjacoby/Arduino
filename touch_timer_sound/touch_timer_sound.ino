@@ -1,15 +1,21 @@
-#include <CapSense.h>
-#include "sinetable.h"
 #include <stdio.h>
+#include <avr/io.h>
+#include <avr/interript.h>
+#include <CapSense.h>
+
+#include "audio.h"
+#include "sinetable.h"
 
 CapSense clip_one = CapSense(9, 10);
 CapSense clip_two = CapSense(4, 12);
 CapSense clip_three = CapSense(13, 5);
 
+uint8_t next_sample = 0;
+
 void setup() 
 {
    cli();
-   timer1_init();
+   audio_init();
    timer0_init();
    sei();
 
@@ -18,8 +24,8 @@ void setup()
 
 long total1, total2, total3;
 char * data_str = (char*) malloc(18 * sizeof(char));
-void loop()                    
-{
+void loop() {
+
     total1 =  clip_one.capSense(5);
     total2 =  clip_two.capSense(5);
     total3 =  clip_three.capSense(5);
@@ -28,29 +34,22 @@ void loop()
     
     Serial.println(data_str);
     delay(10);
-    OCR1A = 0x00f + total1 + total2 + total3; 
-
-    for(int i=0; i< SINETABLE_SIZE; i++) {
-        Serial.println(sinetable[i]);
-    }
-
 
 }
 
-void timer1_init() {
+ISR(TIMER1_COMPA_vect) {
+    audio_output(next_sample);
+}
+
+/*void timer1_init() {/*{{{*/
 
     DDRD |= (1 << PIND0);
     TCCR1A = (1 << WGM11) | (1 << WGM10);
     TCCR1B = (1 << WGM13) | (1 << CS10) ;   
     TIMSK1 = (1 << OCIE1A);
     
-} 
-
-ISR(TIMER1_COMPA_vect) {
-    PORTD ^= (1 << PIND0);
-}
-
-void timer0_init() {
+}*/ /*}}}*/
+void timer0_init() {/*{{{*/
     DDRF = (1 << PINF0);
     TCCR0B = (1 << CS01) | (1 << CS00);
     TIMSK0 = 1 << OCIE0A;
@@ -58,5 +57,5 @@ void timer0_init() {
 }
 
 ISR(TIMER0_COMPA_vect) {
-        PORTF ^= (1 << PINF0);
+        PORTF ^= (1 << PINF0);/*}}}*/
 }
