@@ -1,5 +1,33 @@
+#include <stdint.h>
+#include <avr/io.h>
 
-void generate(void) {
+#include "sinetable.h"
+
+// Variable to hold the next sample that will be output to the speaker
+// static volatile uint8_t next_sample;
+static volatile uint8_t next_sample;
+
+// Flag indicating whether the next sample has been computed.
+// static volatile uint8_t synth_ready;
+static volatile uint8_t synth_ready;
+
+void synth_init(void) {
+    TCCR0A = (1 << WGM01); //CTC
+    TCCR0B = (1 << CS01) | (1 << CS00);
+    TIMSK0 = 1 << OCIE0A;
+    OCR0A = 127;
+}
+
+ISR(TIMER0_COMPA_vect) {
+    audio_output(next_sample);
+    synth_ready = 0;
+
+}
+
+
+
+
+void synth_generate(void) {
 
     uint16_t carrier_inc;
     uint16_t carrier_pos;
@@ -15,11 +43,13 @@ void generate(void) {
 
     uint8_t modulation;
 
+    if(synth_ready) return
 
     carrier_inc = 127;
     mod_ratio_numerator = 1;
     mod_ratio_denominator = 2;
-    modulator_inc = carrier_inc * (mod_ratio_numerator) / (mod_ratio_denominator);
+
+    modulator_inc = carrier_inc * mod_ratio_numerator / mod_ratio_denominator;
 
     modulator_pos = 0;
     carrier_pos = 0;
@@ -33,18 +63,8 @@ void generate(void) {
 
     carrier_pos += carrier_inc;
     cpos += carrier_inc + modulation;
+
     sample = pgm_read_byte(sinetable[&cpos]);
 
-
-
-
-
-
-
-
-
-    pgm_read_byte(sinetable[&cpos])
-
-
-
+    synth_ready = 1;
 }

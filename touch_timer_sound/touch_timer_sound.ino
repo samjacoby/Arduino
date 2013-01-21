@@ -5,6 +5,7 @@
 
 #include "audio.h"
 #include "sinetable.h"
+#include "synth.h"
 
 CapSense clip_one = CapSense(9, 10);
 CapSense clip_two = CapSense(4, 12);
@@ -16,7 +17,7 @@ void setup()
 {
    cli();
    audio_init();
-   timer0_init();
+   synth_init();
    sei();
 
    Serial.begin(115200);
@@ -34,28 +35,8 @@ void loop() {
     
     Serial.println(data_str);
     delay(10);
+    for(;;) {
+        synth_generate(); 
+    }
 
-}
-
-ISR(TIMER1_COMPA_vect) {
-    audio_output(next_sample);
-}
-
-/*void timer1_init() {/*{{{*/
-
-    DDRD |= (1 << PIND0);
-    TCCR1A = (1 << WGM11) | (1 << WGM10);
-    TCCR1B = (1 << WGM13) | (1 << CS10) ;   
-    TIMSK1 = (1 << OCIE1A);
-    
-}*/ /*}}}*/
-void timer0_init() {/*{{{*/
-    DDRF = (1 << PINF0);
-    TCCR0B = (1 << CS01) | (1 << CS00);
-    TIMSK0 = 1 << OCIE0A;
-    OCR0A = 127;
-}
-
-ISR(TIMER0_COMPA_vect) {
-        PORTF ^= (1 << PINF0);/*}}}*/
 }
